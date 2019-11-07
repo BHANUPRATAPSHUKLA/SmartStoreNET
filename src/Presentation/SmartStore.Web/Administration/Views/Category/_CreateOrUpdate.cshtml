@@ -56,7 +56,7 @@
 					    data_select = true,
 					    data_select_lazy = true,
 					    data_select_init_text = Model.ParentCategoryBreadcrumb,
-					    data_select_url = Url.Action("Allcategories", "Category", new { selectedId =  Model.ParentCategoryId })
+					    data_select_url = Url.Action("AllCategories", "Category", new { selectedIds = Model.ParentCategoryId })
 				    })
                     @Html.ValidationMessageFor(model => model.ParentCategoryId)
                 </td>

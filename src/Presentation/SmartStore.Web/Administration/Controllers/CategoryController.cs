@@ -295,12 +295,13 @@ namespace SmartStore.Admin.Controllers
         }
 
 		// Ajax
-		public ActionResult AllCategories(string label, int selectedId)
+		public ActionResult AllCategories(string label, string selectedIds)
         {
 			var categoryTree = _categoryService.GetCategoryTree(includeHidden: true);
 			var categories = categoryTree.Flatten(false);
+            var selectedArr = selectedIds.ToIntArray();
 
-			if (label.HasValue())
+            if (label.HasValue())
             {
 				categories = (new[] { new Category { Name = label, Id = 0 } }).Concat(categories);
 
@@ -312,7 +313,7 @@ namespace SmartStore.Admin.Controllers
 				{ 
 					id = c.Id.ToString(),
 					text = c.GetCategoryPath(_categoryService, aliasPattern: "<span class='badge badge-secondary'>{0}</span>"), 
-					selected = c.Id == selectedId
+					selected = selectedArr.Contains(c.Id)
 				};
 
 			var mainList = query.ToList();

@@ -556,10 +556,24 @@ namespace SmartStore.Admin.Controllers
 
 					model.Filter.AvailableProductTypes = ProductType.SimpleProduct.ToSelectList(false).ToList();
 
-					model.Filter.AvailableCategories = _categoryService.GetCategoryTree(includeHidden: true)
-						.FlattenNodes(false)
-						.Select(x => new SelectListItem { Text = x.GetCategoryNameIndented(), Value = x.Id.ToString() })
-						.ToList();
+                    if (model.Filter.CategoryIds?.Any() ?? false)
+                    {
+                        var tree = _categoryService.GetCategoryTree(includeHidden: true);
+
+                        model.Filter.SelectedCategories = model.Filter.CategoryIds
+                            .Where(x => x != 0)
+                            .Select(x =>
+                            {
+                                var node = tree.SelectNodeById(x);
+                                var item = new SelectListItem { Value = x.ToString(), Text = node == null ? x.ToString() : _categoryService.GetCategoryPath(node) };
+                                return item;
+                            })
+                            .ToList();
+                    }
+                    else
+                    {
+                        model.Filter.SelectedCategories = new List<SelectListItem>();
+                    }
 
 					model.Filter.AvailableManufacturers = allManufacturers
 						.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
@@ -898,7 +912,7 @@ namespace SmartStore.Admin.Controllers
 					AvailabilityMinimum = model.Filter.AvailabilityMinimum,
 					AvailabilityMaximum = model.Filter.AvailabilityMaximum,
 					IsPublished = model.Filter.IsPublished,
-					CategoryIds = model.Filter.CategoryIds,
+					CategoryIds = model.Filter.CategoryIds?.Where(x => x != 0)?.ToArray() ?? new int[0],
 					WithoutCategories = model.Filter.WithoutCategories,
 					ManufacturerId = model.Filter.ManufacturerId,
 					WithoutManufacturers = model.Filter.WithoutManufacturers,
