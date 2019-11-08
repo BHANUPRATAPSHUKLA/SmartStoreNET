@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -38,7 +39,7 @@ namespace SmartStore.Services.Media
 		public string Extension { get; set; }
 	}
 
-	public partial class PictureService : IPictureService
+	public partial class PictureService : ScopedServiceBase, IPictureService
     {
 		// 0 = Id
 		private const string MEDIACACHE_LOOKUP_KEY = "media:info-{0}";
@@ -298,7 +299,8 @@ namespace SmartStore.Services.Media
 					// without locking the whole thing and loosing performance. Better no lock (?)
 					var newInfo = CreatePictureInfo(uncachedPictures.Get(info.PictureId));
 					result.Add(info.PictureId, newInfo);
-					_cacheManager.Put(info.CacheKey, newInfo);
+                    GetCache().Put(info.CacheKey, newInfo);
+                    HasChanges = true;
 				}
 			}
 
@@ -311,12 +313,15 @@ namespace SmartStore.Services.Media
 				return null;
 
 			var cacheKey = MEDIACACHE_LOOKUP_KEY.FormatInvariant(pictureId.GetValueOrDefault());
-			var info = _cacheManager.Get(cacheKey, () =>
-			{
-				return CreatePictureInfo(GetPictureById(pictureId.GetValueOrDefault()));
-			}, independent: true);
 
-			return info;
+            var info = _cacheManager.Get<PictureInfo>(cacheKey, independent: true);
+            if (info == null)
+            {
+                info = CreatePictureInfo(GetPictureById(pictureId.GetValueOrDefault()));
+                GetCache().Put(cacheKey, info);
+            }
+
+            return info;
 		}
 
 		public PictureInfo GetPictureInfo(Picture picture)
@@ -325,10 +330,13 @@ namespace SmartStore.Services.Media
 				return null;
 
 			var cacheKey = MEDIACACHE_LOOKUP_KEY.FormatInvariant(picture.Id);
-			var info = _cacheManager.Get(cacheKey, () =>
-			{
-				return CreatePictureInfo(picture);
-			}, independent: true);
+
+            var info = _cacheManager.Get<PictureInfo>(cacheKey, independent: true);
+            if (info == null)
+            {
+                info = CreatePictureInfo(picture);
+                GetCache().Put(cacheKey, info);
+            }
 
 			return info;
 		}
@@ -501,16 +509,22 @@ namespace SmartStore.Services.Media
 			}
 		}
 
-		public int ClearUrlCache()
-		{
-			return _cacheManager.RemoveByPattern(MEDIACACHE_LOOKUP_KEY_PATTERN);
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ICacheManager GetCache()
+        {
+            return IsInScope ? NullCache.Instance : _cacheManager;
+        }
 
-		#endregion
+        protected override void OnClearCache()
+        {
+            _cacheManager.RemoveByPattern(MEDIACACHE_LOOKUP_KEY_PATTERN);
+        }
 
-		#region Metadata Storage
+        #endregion
 
-		public virtual string GetPictureSeName(string name)
+        #region Metadata Storage
+
+        public virtual string GetPictureSeName(string name)
 		{
 			return SeoHelper.GetSeName(name, true, false, false);
 		}
@@ -636,6 +650,7 @@ namespace SmartStore.Services.Media
 
 			// delete from url cache
 			_cacheManager.Remove(MEDIACACHE_LOOKUP_KEY.FormatInvariant(picture.Id));
+            HasChanges = true;
 
 			// delete from storage
 			_storageProvider.Value.Remove(picture.ToMedia());
@@ -720,7 +735,8 @@ namespace SmartStore.Services.Media
 
 				// delete from url cache
 				_cacheManager.Remove(MEDIACACHE_LOOKUP_KEY.FormatInvariant(picture.Id));
-			}
+                HasChanges = true;
+            }
 
 			picture.MimeType = mimeType;
 			picture.SeoFilename = seoFilename;
