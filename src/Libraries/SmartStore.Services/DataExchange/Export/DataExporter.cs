@@ -903,8 +903,8 @@ namespace SmartStore.Services.DataExchange.Export
 				var searchQuery = new CatalogSearchQuery()
 					.WithCurrency(ctx.ContextCurrency)
 					.WithLanguage(ctx.ContextLanguage)
-					.VisibleIndividuallyOnly(true)
-					.HasStoreId(ctx.Request.Profile.PerStore ? ctx.Store.Id : f.StoreId)
+                    .WithVisibility(ProductVisibility.Full)
+                    .HasStoreId(ctx.Request.Profile.PerStore ? ctx.Store.Id : f.StoreId)
 					.PriceBetween(f.PriceMinimum, f.PriceMaximum)
 					.WithStockQuantity(f.AvailabilityMinimum, f.AvailabilityMaximum)
 					.CreatedBetween(createdFrom, createdTo);
@@ -1008,7 +1008,7 @@ namespace SmartStore.Services.DataExchange.Export
                         {
                             foreach (var associatedProduct in associatedProducts[product.Id])
                             {
-                                if (ctx.Projection.OnlyIndividuallyVisibleAssociated && !associatedProduct.VisibleIndividually)
+                                if (ctx.Projection.OnlyIndividuallyVisibleAssociated && associatedProduct.Visibility == ProductVisibility.Hidden)
                                 {
                                     continue;
                                 }
