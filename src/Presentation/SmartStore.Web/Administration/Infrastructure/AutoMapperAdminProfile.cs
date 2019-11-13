@@ -549,8 +549,7 @@ namespace SmartStore.Admin.Infrastructure
 
 			//specification attributes
 			CreateMap<SpecificationAttribute, SpecificationAttributeModel>()
-				.ForMember(dest => dest.Locales, mo => mo.Ignore())
-				.ForMember(dest => dest.OptionCount, mo => mo.Ignore());
+				.ForMember(dest => dest.Locales, mo => mo.Ignore());
 			CreateMap<SpecificationAttributeModel, SpecificationAttribute>()
 				.ForMember(dest => dest.SpecificationAttributeOptions, mo => mo.Ignore());
 			CreateMap<SpecificationAttributeOption, SpecificationAttributeOptionModel>()
