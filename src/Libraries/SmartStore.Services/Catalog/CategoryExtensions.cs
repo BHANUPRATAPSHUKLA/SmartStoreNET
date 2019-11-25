@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,40 +28,26 @@ namespace SmartStore.Services.Catalog
             var result = new List<T>();
 			var sourceCount = source.Count();
 
-            if (sourceCount == 0)
+            var childNodes = source.Where(c => c.ParentCategoryId == parentId).ToArray();
+            foreach (var node in childNodes)
             {
-                return result;
+                result.Add(node);
+                result.AddRange(SortCategoryNodesForTree(source, node.Id, true));
             }
-
-            var parentMap = source.ToMultimap(x => x.ParentCategoryId, x => x);
-            AddNodesCore(parentId);
 
             if (!ignoreCategoriesWithoutExistingParent && result.Count != sourceCount)
             {
                 // Find categories without parent in provided category source and insert them into result
-                foreach (var category in source)
+                foreach (var cat in source)
 				{
-					if (!result.Any(x => x.Id == category.Id))
+					if (result.Where(x => x.Id == cat.Id).FirstOrDefault() == null)
 					{
-						result.Add(category);
+						result.Add(cat);
 					}	
 				}
             }
 
             return result;
-
-            void AddNodesCore(int pId)
-            {
-                var childNodes = parentMap.ContainsKey(pId)
-                    ? parentMap[pId]
-                    : Enumerable.Empty<T>();
-
-                foreach (var node in childNodes.ToArray())
-                {
-                    result.Add(node);
-                    AddNodesCore(node.Id);
-                }
-            }
         }
 
         /// <summary>
