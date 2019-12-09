@@ -1,0 +1,63 @@
+﻿@model ProductDetailsModel
+
+@using SmartStore.Web.Models.Catalog;
+@using SmartStore.Core.Domain.Orders;
+
+@{
+	var addModel = Model.AddToCart;
+	var showBuyAction = Model.IsAvailable && !Model.AddToCart.DisableBuyButton;
+    var actions = Model.ActionItems.Values.Where(x => !x.IsPrimary).OrderBy(x => x.Priority).ToList();
+}
+
+    <div class="row pd-offer-actions flex-nowrap">
+        @if (showBuyAction)
+        {
+            if (Model.ProductPrice.CallForPrice)
+            {
+                <div class="col">
+                    <a class="btn btn-secondary btn-lg btn-block" rel="nofollow" href="@Url.Action("AskQuestion", "Product", new { id = Model.Id })">
+                        <i class="fa fa-envelope"></i>
+                        <span>@T("Products.CallForPrice.GoToForm")</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                if (!Model.AddToCart.HideQuantityControl)
+                {
+                    <div class="col pd-offer-action-qty">
+                        @Html.EditorFor(model => model.AddToCart, "QtyInput", new { large = false })
+                    </div>
+                }
+
+                <div class="col flex-grow-1">
+                    <a class="btn btn-primary btn-add-to-cart ajax-cart-link"
+                       href="#"
+                       rel="nofollow"
+                       data-href='@Url.Action("AddProduct", "ShoppingCart", new { productId = Model.AddToCart.ProductId, shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart })'
+                       data-form-selector="#pd-form"
+                       data-type="cart"
+                       data-action="add"
+                       data-toggle="offcanvas" data-target="#offcanvas-cart"
+                       title="@(Model.AddToCart.AvailableForPreOrder ? T("ShoppingCart.PreOrder") : T("ShoppingCart.AddToCart"))">
+                        <i class="fa fa-cart-arrow-down"></i>
+                        @*<span>@(Model.AddToCart.AvailableForPreOrder ? T("ShoppingCart.PreOrder") : T("ShoppingCart.AddToCart"))</span>*@
+                    </a>
+                    
+                    @if (actions.Count > 0)
+                    {
+                        foreach (var action in actions)
+                        {
+                            <a href="@action.Href" 
+                               class="btn btn-secondary ajax-cart-link action-add-to-wishlist @action.CssClass" 
+                               title="@action.Title" 
+                               data-type="wishlist" 
+                               data-action="add">
+                               <i class="fa fa-heart"></i>
+                            </a>
+                        }
+                    }
+                </div>
+            }
+        }
+    </div>

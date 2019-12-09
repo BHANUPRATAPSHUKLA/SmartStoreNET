@@ -141,7 +141,7 @@
 							{
 								var dataDictProduct = new ViewDataDictionary();
 								dataDictProduct.TemplateInfo.HtmlFieldPrefix = string.Format("product_{0}", product.Id);
-								Html.RenderPartial("Product.AssociatedProduct", product, dataDictProduct);
+								Html.RenderPartial("Product.AssociatedProductSimple", product, dataDictProduct);
 							}
 						}
 					</section>

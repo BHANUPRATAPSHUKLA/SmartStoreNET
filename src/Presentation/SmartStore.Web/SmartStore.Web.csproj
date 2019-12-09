@@ -1856,6 +1856,9 @@
     <Content Include="Views\Shared\Menus\ListGroup.cshtml" />
     <Content Include="Views\Shared\Menus\Main.cshtml" />
     <Content Include="Views\Catalog\Menus\Categories.cshtml" />
+    <Content Include="Views\Product\Partials\Product.Offer.ActionsSimple.cshtml" />
+    <Content Include="Views\Product\Partials\Product.OfferSimple.cshtml" />
+    <Content Include="Views\Product\Partials\Product.AssociatedProductSimple.cshtml" />
     <None Include="Web.EFMigrations.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

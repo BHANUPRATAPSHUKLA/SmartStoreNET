@@ -1,0 +1,32 @@
+﻿@model ProductDetailsModel
+@using SmartStore.Web.Models.Catalog;
+@using SmartStore.Web;
+
+@{ 
+	string updateUrl = Url.Action("UpdateProductDetails", "Product", new
+	{
+		productId = Model.Id,
+		bundleItemId = Model.BundleItem.Id,
+		itemType = "associateditem"
+	});
+}
+
+<hr />
+
+<article class="pd-variant row update-container" data-url="@updateUrl" itemscope itemtype="http://schema.org/Product">
+    <div class="col-8 col-sm-6 col-lg-5">
+        <!-- Title/Brand/ReviewSummary -->
+        @{ Html.RenderPartial("Product.Info", Model); }
+
+        <!-- Product attributes (SKU, EAN, Weight etc.) -->
+        <div class="pd-attrs-container" data-partial="Attrs">
+            @{ Html.RenderPartial("Product.Attrs", Model); }
+        </div>
+    </div>
+    <div class="col col-lg-7 d-flex">
+        <!-- Offer box -->
+        @{ Html.RenderPartial("Product.OfferSimple", Model); }
+    </div>
+</article>
+
+
