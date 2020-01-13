@@ -76,6 +76,12 @@
             builder.Delete(
                 "Admin.Catalog.Products.Fields.VisibleIndividually",
                 "Admin.Catalog.Products.Fields.VisibleIndividually.Hint");
+
+            builder.AddOrUpdate("Admin.DataExchange.Export.Filter.ImportCatalogId",
+                "Import catalog identifier",
+                "Import-Katalog ID",
+                "Filter by import catalog identifier.",
+                "Nach Import-Katalog ID filtern.");
         }
     }
 }

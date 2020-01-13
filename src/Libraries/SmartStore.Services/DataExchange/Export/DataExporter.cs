@@ -87,7 +87,7 @@ namespace SmartStore.Services.DataExchange.Export
         private readonly Lazy<IDownloadService> _downloadService;
         private readonly Lazy<ProductUrlHelper> _productUrlHelper;
 
-		private readonly Lazy<IRepository<Customer>>_customerRepository;
+        private readonly Lazy<IRepository<Customer>>_customerRepository;
 		private readonly Lazy<IRepository<NewsLetterSubscription>> _subscriptionRepository;
 		private readonly Lazy<IRepository<Order>> _orderRepository;
 		private readonly Lazy<IRepository<ShoppingCartItem>> _shoppingCartItemRepository;
@@ -907,8 +907,11 @@ namespace SmartStore.Services.DataExchange.Export
 					searchQuery = searchQuery.WithProductId(f.IdMinimum, f.IdMaximum);
 
 				query = _catalogSearchService.Value.PrepareQuery(searchQuery);
-			}
-			else
+
+                if (f.ImportCatalogId.HasValue())
+                    query = query.Where(x => x.ImportCatalogId == f.ImportCatalogId);
+            }
+            else
 			{
 				query = ctx.Request.ProductQuery;
 			}
@@ -984,6 +987,10 @@ namespace SmartStore.Services.DataExchange.Export
                                     continue;
                                 }
                                 if (ctx.Filter.IsPublished.HasValue && ctx.Filter.IsPublished.Value != associatedProduct.Published)
+                                {
+                                    continue;
+                                }
+                                if (ctx.Filter.ImportCatalogId.HasValue() && ctx.Filter.ImportCatalogId != associatedProduct.ImportCatalogId)
                                 {
                                     continue;
                                 }

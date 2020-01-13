@@ -58,10 +58,15 @@ namespace SmartStore.Core.Domain.DataExchange
 		/// </summary>
 		public int? AvailabilityMaximum { get; set; }
 
-		/// <summary>
-		/// A value indicating whether to load only published or non published products
-		/// </summary>
-		public bool? IsPublished { get; set; }
+        /// <summary>
+        /// Import catalog identifier.
+        /// </summary>
+        public string ImportCatalogId { get; set; }
+
+        /// <summary>
+        /// A value indicating whether to load only published or non published products
+        /// </summary>
+        public bool? IsPublished { get; set; }
 
 		/// <summary>
 		/// Category identifiers

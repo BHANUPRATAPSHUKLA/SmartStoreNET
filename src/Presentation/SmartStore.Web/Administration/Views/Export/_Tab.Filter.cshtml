@@ -20,6 +20,15 @@
 		}
 		<tr>
 			<td class="adminTitle">
+				@Html.SmartLabelFor(x => x.Filter.ImportCatalogId)
+			</td>
+			<td class="adminData">
+				@Html.EditorFor(x => x.Filter.ImportCatalogId)
+				@Html.ValidationMessageFor(x => x.Filter.ImportCatalogId)
+			</td>
+		</tr>
+		<tr>
+			<td class="adminTitle">
 				@Html.SmartLabelFor(x => x.Filter.ProductType)
 			</td>
 			<td class="adminData">
