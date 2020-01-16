@@ -82,7 +82,7 @@ namespace SmartStore.Services.DataExchange.Import
 				case "ShippingAddress.CreatedOnUtc":
 					key = "Common.CreatedOn";
 					break;
-				case "UpdatedOnUtc":
+                case "UpdatedOnUtc":
 					key = "Common.UpdatedOn";
 					break;
 				case "HasDiscountsApplied":
@@ -103,7 +103,22 @@ namespace SmartStore.Services.DataExchange.Import
 				case "LastIpAddress":
 					key = "Admin.Customers.Customers.Fields.IPAddress";
 					break;
-				default:
+                case "CustomerNumber":
+                    key = "Account.Fields.CustomerNumber";
+                    break;
+                case "BirthDate":
+                    key = "Admin.Customers.Customers.Fields.DateOfBirth";
+                    break;
+                case "Salutation":
+                    key = "Address.Fields.Salutation";
+                    break;
+                case "SubjectToAcl":
+                    key = "Admin.Catalog.Products.Acl";
+                    break;
+                case "VisibleIndividually":
+                    key = "Admin.Catalog.Products.Fields.Visibility";
+                    break;
+                default:
 					switch (type)
 					{
 						case ImportEntityType.Product:
@@ -114,7 +129,7 @@ namespace SmartStore.Services.DataExchange.Import
 							break;
 						case ImportEntityType.Customer:
 							if (property.StartsWith("BillingAddress.") || property.StartsWith("ShippingAddress."))						
-								key = "Admin.Address.Fields." + property.Substring(property.IndexOf('.') + 1);
+								key = "Address.Fields." + property.Substring(property.IndexOf('.') + 1);
 							else
 								key = "Admin.Customers.Customers.Fields." + property;
 							break;
