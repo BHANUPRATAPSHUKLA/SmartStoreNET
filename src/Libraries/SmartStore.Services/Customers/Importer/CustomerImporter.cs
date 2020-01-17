@@ -463,7 +463,6 @@ namespace SmartStore.Services.Customers.Importer
             }
 
             Address address = null;
-            //var address = new Address { CreatedOnUtc = UtcNow };
 
             if (fieldPrefix == "BillingAddress.")
             {
@@ -517,19 +516,25 @@ namespace SmartStore.Services.Customers.Importer
 				return;
 			}
 
-            if (childRow.Entity.Id == 0)
+            if (address.Id == 0)
             {
+                // Avoid importing two addresses if billing and shipping address are equal.
+                var appliedAddress = row.Entity.Addresses.FindAddress(address);
+                if (appliedAddress == null)
+                {
+                    appliedAddress = address;
+                    row.Entity.Addresses.Add(appliedAddress);
+                }
+
                 // Map address to customer.
                 if (fieldPrefix == "BillingAddress.")
                 {
-                    row.Entity.BillingAddress = childRow.Entity;
+                    row.Entity.BillingAddress = appliedAddress;
                 }
                 else if (fieldPrefix == "ShippingAddress.")
                 {
-                    row.Entity.ShippingAddress = childRow.Entity;
+                    row.Entity.ShippingAddress = appliedAddress;
                 }
-
-                row.Entity.Addresses.Add(childRow.Entity);
             }
 
             _customerRepository.Update(row.Entity);
