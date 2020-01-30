@@ -77,11 +77,11 @@
                 "Admin.Catalog.Products.Fields.VisibleIndividually",
                 "Admin.Catalog.Products.Fields.VisibleIndividually.Hint");
 
-            builder.AddOrUpdate("Admin.DataExchange.Export.Filter.ImportCatalogId",
-                "Import catalog identifier",
-                "Import-Katalog ID",
-                "Filter by import catalog identifier.",
-                "Nach Import-Katalog ID filtern.");
+            builder.AddOrUpdate("Admin.DataExchange.Export.Filter.ImportCatalogIds",
+                "Import catalog identifiers",
+                "Import-Katalog IDs",
+                "Filter by import catalog identifiers.",
+                "Nach Import-Katalog IDs filtern.");
         }
     }
 }

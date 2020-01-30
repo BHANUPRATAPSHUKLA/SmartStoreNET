@@ -472,7 +472,7 @@ namespace SmartStore.Admin.Controllers
 				PriceMaximum = filter.PriceMaximum,
 				AvailabilityMinimum = filter.AvailabilityMinimum,
 				AvailabilityMaximum = filter.AvailabilityMaximum,
-                ImportCatalogId = filter.ImportCatalogId,
+                ImportCatalogIds = filter.ImportCatalogIds ?? new string[0],
 				IsPublished = filter.IsPublished,
 				CategoryIds = filter.CategoryIds,
 				WithoutCategories = filter.WithoutCategories,
@@ -557,6 +557,7 @@ namespace SmartStore.Admin.Controllers
 					model.Projection.AvailableCriticalCharacters = new MultiSelectList(projection.CriticalCharacters.SplitSafe(","));
 
 					model.Filter.AvailableProductTypes = ProductType.SimpleProduct.ToSelectList(false).ToList();
+                    model.Filter.AvailableImportCatalogIds = new MultiSelectList(filter.ImportCatalogIds ?? new string[0]);
 
                     if (model.Filter.CategoryIds?.Any() ?? false)
                     {
@@ -913,8 +914,8 @@ namespace SmartStore.Admin.Controllers
 					PriceMaximum = model.Filter.PriceMaximum,
 					AvailabilityMinimum = model.Filter.AvailabilityMinimum,
 					AvailabilityMaximum = model.Filter.AvailabilityMaximum,
-                    ImportCatalogId = model.Filter.ImportCatalogId,
-					IsPublished = model.Filter.IsPublished,
+                    ImportCatalogIds = model.Filter.ImportCatalogIds ?? new string[0],
+                    IsPublished = model.Filter.IsPublished,
 					CategoryIds = model.Filter.CategoryIds?.Where(x => x != 0)?.ToArray() ?? new int[0],
 					WithoutCategories = model.Filter.WithoutCategories,
 					ManufacturerId = model.Filter.ManufacturerId,

@@ -59,9 +59,9 @@ namespace SmartStore.Core.Domain.DataExchange
 		public int? AvailabilityMaximum { get; set; }
 
         /// <summary>
-        /// Import catalog identifier.
+        /// Import catalog identifiers.
         /// </summary>
-        public string ImportCatalogId { get; set; }
+        public string[] ImportCatalogIds { get; set; }
 
         /// <summary>
         /// A value indicating whether to load only published or non published products

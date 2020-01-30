@@ -20,11 +20,11 @@
 		}
 		<tr>
 			<td class="adminTitle">
-				@Html.SmartLabelFor(x => x.Filter.ImportCatalogId)
+				@Html.SmartLabelFor(x => x.Filter.ImportCatalogIds)
 			</td>
 			<td class="adminData">
-				@Html.EditorFor(x => x.Filter.ImportCatalogId)
-				@Html.ValidationMessageFor(x => x.Filter.ImportCatalogId)
+                @Html.ListBoxFor(x => x.Filter.ImportCatalogIds, Model.Filter.AvailableImportCatalogIds, new { multiple = "multiple", data_tags = "true" })
+				@Html.ValidationMessageFor(x => x.Filter.ImportCatalogIds)
 			</td>
 		</tr>
 		<tr>

@@ -908,8 +908,8 @@ namespace SmartStore.Services.DataExchange.Export
 
 				query = _catalogSearchService.Value.PrepareQuery(searchQuery);
 
-                if (f.ImportCatalogId.HasValue())
-                    query = query.Where(x => x.ImportCatalogId == f.ImportCatalogId);
+                if (f.ImportCatalogIds?.Any() ?? false)
+                    query = query.Where(x => f.ImportCatalogIds.Contains(x.ImportCatalogId));
             }
             else
 			{
@@ -990,7 +990,7 @@ namespace SmartStore.Services.DataExchange.Export
                                 {
                                     continue;
                                 }
-                                if (ctx.Filter.ImportCatalogId.HasValue() && ctx.Filter.ImportCatalogId != associatedProduct.ImportCatalogId)
+                                if ((ctx.Filter.ImportCatalogIds?.Any() ?? false) && !ctx.Filter.ImportCatalogIds.Contains(associatedProduct.ImportCatalogId))
                                 {
                                     continue;
                                 }

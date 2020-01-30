@@ -33,8 +33,9 @@ namespace SmartStore.Admin.Models.DataExchange
 		[SmartResourceDisplayName("Admin.DataExchange.Export.Filter.IsPublished")]
 		public bool? IsPublished { get; set; }
 
-        [SmartResourceDisplayName("Admin.DataExchange.Export.Filter.ImportCatalogId")]
-        public string ImportCatalogId { get; set; }
+        [SmartResourceDisplayName("Admin.DataExchange.Export.Filter.ImportCatalogIds")]
+        public string[] ImportCatalogIds { get; set; }
+        public MultiSelectList AvailableImportCatalogIds { get; set; }
 
         [SmartResourceDisplayName("Admin.DataExchange.Export.Filter.ProductType")]
 		public ProductType? ProductType { get; set; }
