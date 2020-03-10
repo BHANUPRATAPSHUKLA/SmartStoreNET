@@ -229,7 +229,7 @@ namespace SmartStore.Services.Catalog
 
             if ((product.ManageInventoryMethod == ManageInventoryMethod.ManageStock || product.ManageInventoryMethod == ManageInventoryMethod.ManageStockByAttributes)
                 && catalogSettings.DeliveryTimeIdForEmptyStock.HasValue
-                && product.StockQuantity <= 0)
+                && product.StockQuantity < 0)
             {
                 return catalogSettings.DeliveryTimeIdForEmptyStock.Value;
             }
