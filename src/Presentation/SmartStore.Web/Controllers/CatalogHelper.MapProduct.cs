@@ -515,7 +515,7 @@ namespace SmartStore.Web.Controllers
 				//}
 
 				var deliveryTimeId = product.DeliveryTimeId ?? 0;
-				if (product.ManageInventoryMethod == ManageInventoryMethod.ManageStock && product.StockQuantity < 0 && _catalogSettings.DeliveryTimeIdForEmptyStock.HasValue)
+				if (product.ManageInventoryMethod == ManageInventoryMethod.ManageStock && product.StockQuantity <= 0 && _catalogSettings.DeliveryTimeIdForEmptyStock.HasValue)
 				{
 					deliveryTimeId = _catalogSettings.DeliveryTimeIdForEmptyStock.Value;
 				}
@@ -528,7 +528,7 @@ namespace SmartStore.Web.Controllers
 				}
 
                 item.DisplayDeliveryTimeAccordingToStock = product.ManageInventoryMethod == ManageInventoryMethod.ManageStock
-                    ? product.StockQuantity > 0 || (product.StockQuantity < 0 && _catalogSettings.DeliveryTimeIdForEmptyStock.HasValue)
+                    ? product.StockQuantity >= 0 || (product.StockQuantity < 0 && _catalogSettings.DeliveryTimeIdForEmptyStock.HasValue)
                     : true;
 
 				if (product.DisplayStockAvailability && product.ManageInventoryMethod == ManageInventoryMethod.ManageStock)
