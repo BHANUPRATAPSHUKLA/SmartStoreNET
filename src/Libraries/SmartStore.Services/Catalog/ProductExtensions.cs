@@ -227,14 +227,19 @@ namespace SmartStore.Services.Catalog
                 return null;
             }
 
-            if ((product.ManageInventoryMethod == ManageInventoryMethod.ManageStock || product.ManageInventoryMethod == ManageInventoryMethod.ManageStockByAttributes)
-                && catalogSettings.DeliveryTimeIdForEmptyStock.HasValue
-                && product.StockQuantity < 0)
-            {
-                return catalogSettings.DeliveryTimeIdForEmptyStock.Value;
-            }
+			//if ((product.ManageInventoryMethod == ManageInventoryMethod.ManageStock || product.ManageInventoryMethod == ManageInventoryMethod.ManageStockByAttributes)
+			//    && catalogSettings.DeliveryTimeIdForEmptyStock.HasValue
+			//    && product.StockQuantity < 0)
+			//{
+			//    return catalogSettings.DeliveryTimeIdForEmptyStock.Value;
+			//}
 
-            return product.DeliveryTimeId;
+			if (product.DeliveryTimeId == null && catalogSettings.DeliveryTimeIdForEmptyStock.HasValue)
+			{
+				return catalogSettings.DeliveryTimeIdForEmptyStock.Value;
+			}
+
+			return product.DeliveryTimeId;
         }
 
         /// <summary>
