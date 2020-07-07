@@ -9,7 +9,6 @@ using SmartStore.Core.Data;
 using SmartStore.Core.Domain;
 using SmartStore.Core.Domain.DataExchange;
 using SmartStore.Core.Domain.Tasks;
-using SmartStore.Core.Events;
 using SmartStore.Core.Localization;
 using SmartStore.Services.Catalog.Importer;
 using SmartStore.Services.Customers.Importer;
@@ -20,13 +19,12 @@ using SmartStore.Utilities;
 
 namespace SmartStore.Services.DataExchange.Import
 {
-	public partial class ImportProfileService : IImportProfileService
+    public partial class ImportProfileService : IImportProfileService
 	{
 		private static object _lock = new object();
 		private static Dictionary<ImportEntityType, Dictionary<string, string>> _entityProperties = null;
 
 		private readonly IRepository<ImportProfile> _importProfileRepository;
-		private readonly IEventPublisher _eventPublisher;
 		private readonly IScheduleTaskService _scheduleTaskService;
 		private readonly ILocalizationService _localizationService;
 		private readonly ILanguageService _languageService;
@@ -34,14 +32,12 @@ namespace SmartStore.Services.DataExchange.Import
 
 		public ImportProfileService(
 			IRepository<ImportProfile> importProfileRepository,
-			IEventPublisher eventPublisher,
 			IScheduleTaskService scheduleTaskService,
 			ILocalizationService localizationService,
 			ILanguageService languageService,
 			DataExchangeSettings dataExchangeSettings)
 		{
 			_importProfileRepository = importProfileRepository;
-			_eventPublisher = eventPublisher;
 			_scheduleTaskService = scheduleTaskService;
 			_localizationService = localizationService;
 			_languageService = languageService;
@@ -50,16 +46,23 @@ namespace SmartStore.Services.DataExchange.Import
 
 		private string GetLocalizedPropertyName(ImportEntityType type, string property)
 		{
-			if (property.IsEmpty())
-				return "";
+            // TODO: find a better solution for this.
+            if (property.IsEmpty())
+            {
+                return string.Empty;
+            }
 
 			string key = null;
 			string prefixKey = null;
 
-			if (property.StartsWith("BillingAddress."))
-				prefixKey = "Admin.Orders.Fields.BillingAddress";
-			else if (property.StartsWith("ShippingAddress."))
-				prefixKey = "Admin.Orders.Fields.ShippingAddress";
+            if (property.StartsWith("BillingAddress."))
+            {
+                prefixKey = "Admin.Orders.Fields.BillingAddress";
+            }
+            else if (property.StartsWith("ShippingAddress."))
+            {
+                prefixKey = "Admin.Orders.Fields.ShippingAddress";
+            }
 
 			#region Get resource key
 
@@ -68,15 +71,16 @@ namespace SmartStore.Services.DataExchange.Import
 				case "Id":
 					key = "Admin.Common.Entity.Fields.Id";
 					break;
-				case "LimitedToStores":
-					key = "Admin.Common.Store.LimitedTo";
-					break;
 				case "DisplayOrder":
-					key = "Common.DisplayOrder";
+                case "HomePageDisplayOrder":
+                    key = "Common.DisplayOrder";
 					break;
 				case "Deleted":
 					key = "Admin.Common.Deleted";
 					break;
+                case "WorkingLanguageId":
+                    key = "Common.Language";
+                    break;
 				case "CreatedOnUtc":
 				case "BillingAddress.CreatedOnUtc":
 				case "ShippingAddress.CreatedOnUtc":
@@ -94,7 +98,13 @@ namespace SmartStore.Services.DataExchange.Import
 				case "StoreId":
 					key = "Admin.Common.Store";
 					break;
-				case "ParentGroupedProductId":
+                case "LimitedToStores":
+                    key = "Admin.Common.Store.LimitedTo";
+                    break;
+                case "SubjectToAcl":
+                    key = "Admin.Common.CustomerRole.LimitedTo";
+                    break;
+                case "ParentGroupedProductId":
 					key = "Admin.Catalog.Products.Fields.AssociatedToProductName";
 					break;
 				case "PasswordFormatId":
@@ -140,19 +150,25 @@ namespace SmartStore.Services.DataExchange.Import
 					break;
 			}
 
-			#endregion
+            #endregion
 
-			if (key.IsEmpty())
-				return "";
+            if (key.IsEmpty())
+            {
+                return string.Empty;
+            }
 
 			var result = _localizationService.GetResource(key, 0, false, "", true);
 
 			if (result.IsEmpty())
 			{
-				if (key.EndsWith("Id"))
-					result = _localizationService.GetResource(key.Substring(0, key.Length - 2), 0, false, "", true);
-				else if (key.EndsWith("Utc"))
-					result = _localizationService.GetResource(key.Substring(0, key.Length - 3), 0, false, "", true);
+                if (key.EndsWith("Id"))
+                {
+                    result = _localizationService.GetResource(key.Substring(0, key.Length - 2), 0, false, "", true);
+                }
+                else if (key.EndsWith("Utc"))
+                {
+                    result = _localizationService.GetResource(key.Substring(0, key.Length - 3), 0, false, "", true);
+                }
 			}
 
 			if (result.IsEmpty())

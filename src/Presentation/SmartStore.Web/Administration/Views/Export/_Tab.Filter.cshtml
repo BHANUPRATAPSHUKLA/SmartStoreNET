@@ -13,7 +13,7 @@
 					@Html.SmartLabelFor(x => x.Filter.StoreId)
 				</td>
 				<td class="adminData">
-					@Html.DropDownListFor(x => x.Filter.StoreId, Model.Filter.AvailableStores, Model.AllString)
+                    @Html.EditorFor(x => x.Filter.StoreId)
 					@Html.ValidationMessageFor(x => x.Filter.StoreId)
 				</td>
 			</tr>
@@ -270,7 +270,7 @@
 					@Html.SmartLabelFor(x => x.Filter.StoreId)
 				</td>
 				<td class="adminData">
-					@Html.DropDownListFor(x => x.Filter.StoreId, Model.Filter.AvailableStores, Model.AllString)
+					@Html.EditorFor(x => x.Filter.StoreId)
 					@Html.ValidationMessageFor(x => x.Filter.StoreId)
 				</td>
 			</tr>
@@ -375,7 +375,7 @@
 					@Html.SmartLabelFor(x => x.Filter.StoreId)
 				</td>
 				<td class="adminData">
-					@Html.DropDownListFor(x => x.Filter.StoreId, Model.Filter.AvailableStores, Model.AllString)
+					@Html.EditorFor(x => x.Filter.StoreId)
 					@Html.ValidationMessageFor(x => x.Filter.StoreId)
 				</td>
 			</tr>

@@ -2,18 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using System.Data.Entity;
 using Autofac;
 using SmartStore.Core.Domain.Catalog;
+using SmartStore.Core.Domain.Seo;
 using SmartStore.Core.Localization;
 using SmartStore.Core.Logging;
 using SmartStore.Core.Search;
 using SmartStore.Core.Search.Facets;
 using SmartStore.Services.Catalog;
+using SmartStore.Services.Seo;
+using SmartStore.Data.Utilities;
 
 namespace SmartStore.Services.Search
 {
-    public partial class CatalogSearchService : SearchServiceBase, ICatalogSearchService
-    {
+    public partial class CatalogSearchService : SearchServiceBase, ICatalogSearchService, IXmlSitemapPublisher
+	{
 		private readonly ICommonServices _services;
 		private readonly IIndexManager _indexManager;
 		private readonly Lazy<IProductService> _productService;
@@ -156,7 +160,8 @@ namespace SmartStore.Services.Search
 					var stepPrefix = searchEngine.GetType().Name + " - ";
 
 					int totalCount = 0;
-					string[] spellCheckerSuggestions = null;
+                    int[] hitsEntityIds = null;
+                    string[] spellCheckerSuggestions = null;
 					IEnumerable<ISearchHit> searchHits;
 					Func<IList<Product>> hitsFactory = null;
 					IDictionary<string, FacetGroup> facets = null;
@@ -184,8 +189,8 @@ namespace SmartStore.Services.Search
 
 							using (_services.Chronometer.Step(stepPrefix + "Collect"))
 							{
-								var productIds = searchHits.Select(x => x.EntityId).ToArray();
-								hitsFactory = () => _productService.Value.GetProductsByIds(productIds, loadFlags);
+                                hitsEntityIds = searchHits.Select(x => x.EntityId).ToArray();
+								hitsFactory = () => _productService.Value.GetProductsByIds(hitsEntityIds, loadFlags);
 							}
 						}
 
@@ -226,7 +231,8 @@ namespace SmartStore.Services.Search
 						searchEngine,
 						searchQuery,
 						totalCount,
-						hitsFactory,
+                        hitsEntityIds,
+                        hitsFactory,
 						spellCheckerSuggestions,
 						facets);
 
@@ -249,5 +255,55 @@ namespace SmartStore.Services.Search
 			var linqCatalogSearchService = _services.Container.ResolveNamed<ICatalogSearchService>("linq");
 			return linqCatalogSearchService.PrepareQuery(searchQuery, baseQuery);
 		}
+
+		#region XML Sitemap
+
+		public XmlSitemapProvider PublishXmlSitemap(XmlSitemapBuildContext context)
+		{
+			if (!context.LoadSetting<SeoSettings>().XmlSitemapIncludesProducts)
+				return null;
+
+			var searchQuery = new CatalogSearchQuery()
+				.VisibleOnly(_services.WorkContext.CurrentCustomer)
+				.WithVisibility(ProductVisibility.Full)
+				.HasStoreId(context.RequestStoreId);
+
+			var query = PrepareQuery(searchQuery);
+
+			return new ProductXmlSitemapResult { Query = query, Context = context };
+		}
+
+		class ProductXmlSitemapResult : XmlSitemapProvider
+		{
+			public IQueryable<Product> Query { get; set; }
+			public XmlSitemapBuildContext Context { get; set; }
+
+			public override int GetTotalCount()
+			{
+				return Query.Count();
+			}
+
+			public override IEnumerable<NamedEntity> Enlist()
+			{
+				var pager = new FastPager<Product>(Query.AsNoTracking(), Context.MaximumNodeCount);
+
+				while (pager.ReadNextPage(x => new { x.Id, x.UpdatedOnUtc }, x => x.Id, out var products))
+				{
+					if (Context.CancellationToken.IsCancellationRequested)
+					{
+						break;
+					}
+
+					foreach (var x in products)
+					{
+						yield return new NamedEntity { EntityName = "Product", Id = x.Id, LastMod = x.UpdatedOnUtc };
+					}
+				}
+			}
+
+			public override int Order => int.MaxValue;
+		}
+
+		#endregion
 	}
 }

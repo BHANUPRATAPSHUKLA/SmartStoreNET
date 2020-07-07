@@ -1,12 +1,16 @@
 ﻿namespace SmartStore.Data.Migrations
 {
 	using System;
+    using System.Linq;
 	using System.Data.Entity.Migrations;
 	using Setup;
     using SmartStore.Core.Data;
     using SmartStore.Core.Domain.Catalog;
 	using SmartStore.Core.Domain.Common;
-	using SmartStore.Utilities;
+    using SmartStore.Core.Domain.Configuration;
+    using SmartStore.Core.Domain.Media;
+    using SmartStore.Core.Domain.Tasks;
+    using SmartStore.Utilities;
 
 	public sealed class MigrationsConfiguration : DbMigrationsConfiguration<SmartObjectContext>
 	{
@@ -39,49 +43,27 @@
 
 		protected override void Seed(SmartObjectContext context)
 		{
-			context.MigrateLocaleResources(MigrateLocaleResources);
+            context.MigrateLocaleResources(MigrateLocaleResources);
 			MigrateSettings(context);
         }
 
 		public void MigrateSettings(SmartObjectContext context)
 		{
 
-		}
+        }
 
 		public void MigrateLocaleResources(LocaleResourcesBuilder builder)
 		{
-            builder.AddOrUpdate("Admin.Configuration.Settings.CustomerUser.VatIdValidCustomerRoleId",
-                "Customer role for valid Vat-ID",
-                "Kundengruppe bei valider Vat-ID",
-                "Defines the customer role that is assigned to customers whose Vat ID is valid.",
-                "Legt eine Kundengruppe fest, die Kunden zugeordnet wird, deren Vat-ID gültig ist.");
+			builder.AddOrUpdate("Admin.Rules.FilterDescriptor.CartProductCount", "Number of products", "Anzahl der Produkte");
 
-            builder.AddOrUpdate("Admin.Catalog.Products.Fields.Visibility",
-                "Visibility",
-                "Sichtbarkeit",
-                "Limits the visibility of the product. In the case of \"Not visible\", the product only appears as an associated product on the parent product detail page, but without a link to an individual page.",
-                "Schränkt die Sichtbarkeit des Produktes ein. Bei \"Nicht sichtbar\" erscheint das Produkt nur noch als verknüpftes Produkt auf der übergeordneten Produktdetailseite, jedoch ohne Verlinkung auf eine eigenständige Seite.");
+			builder.AddOrUpdate("ShoppingCart.QuantityExceedsStock")
+				.Value("de", "Die Bestellmenge übersteigt den Lagerbestand. Es können maximal {0} bestellt werden.");
 
-            builder.AddOrUpdate("Admin.DataExchange.Export.Filter.Visibility",
-                "Visibility",
-                "Sichtbarkeit",
-                "Filter by visibility. \"In search results\" includes fully visible products.",
-                "Nach Sichtbarkeit filter. \"In Suchergebnissen\" schließt überall sichtbare Produkte mit ein.");
+			builder.AddOrUpdate("Account.CustomerOrders.RecurringOrders.ViewInitialOrder",
+				"Order Details (ID - {0})",
+				"Bestelldetails (ID - {0})");
 
-            builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Catalog.ProductVisibility.Full", "Fully visible", "Überall sichtbar");
-            builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Catalog.ProductVisibility.SearchResults", "In search results", "In Suchergebnissen");
-            builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Catalog.ProductVisibility.ProductPage", "On product detail pages", "Auf Produktdetailseiten");
-            builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Catalog.ProductVisibility.Hidden", "Not visible", "Nicht sichtbar");
-
-            builder.Delete(
-                "Admin.Catalog.Products.Fields.VisibleIndividually",
-                "Admin.Catalog.Products.Fields.VisibleIndividually.Hint");
-
-            builder.AddOrUpdate("Admin.DataExchange.Export.Filter.ImportCatalogIds",
-                "Import catalog identifiers",
-                "Import-Katalog IDs",
-                "Filter by import catalog identifiers.",
-                "Nach Import-Katalog IDs filtern.");
-        }
-    }
+			builder.Delete("Account.CustomerOrders.RecurringOrders.InitialOrder");
+		}
+	}
 }

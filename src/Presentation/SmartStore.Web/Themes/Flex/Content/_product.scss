@@ -43,6 +43,10 @@ $pd-offer-spacing:              $grid-gutter-width / 2;
 
 .pd-tabs {
     margin-bottom: 1rem;
+
+    > .nav-tabs {
+        justify-content: center;
+    }
 }
 
 
@@ -75,11 +79,12 @@ $pd-offer-spacing:              $grid-gutter-width / 2;
 // =====================================================
 
 .pd-name {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
+    font-weight: $font-weight-bold;
 }
 
 .pd-name-sm {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: $font-weight-medium;
 }
 
@@ -166,6 +171,7 @@ $pd-offer-spacing:              $grid-gutter-width / 2;
     padding: $pd-offer-spacing;
     line-height: $pd-line-height;
     width: 100%;
+    border-radius: $border-radius;
 }
 
 .row.pd-offer-actions {
@@ -179,11 +185,6 @@ $pd-offer-spacing:              $grid-gutter-width / 2;
     }
 
     .pd-offer-action-qty { max-width: 120px; min-width: 90px; }
-
-    // hide elements when container is too small
-    @media (max-width: 400px), (min-width: 768px) and (max-width: 1199px) {
-        .pd-offer-action-qty { display: none !important; }
-    }
 }
 
 
@@ -488,18 +489,4 @@ $pd-offer-spacing:              $grid-gutter-width / 2;
             transform: scale(1.14);
         }
     }
-}
-
-
-// Misc
-// =====================================================
-
-.btn-edit-product {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 0;
-    background-color: rgba(#fff, 0.5);
-
-    .pd-section-top:hover & { display: inline-block; }
 }

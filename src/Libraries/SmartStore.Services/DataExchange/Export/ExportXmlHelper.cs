@@ -337,7 +337,7 @@ namespace SmartStore.Services.DataExchange.Export
 			if (picture == null)
 				return;
 
-			Picture entity = picture.Entity;
+			MediaFile entity = picture.Entity;
 
 			if (node.HasValue())
 			{
@@ -345,7 +345,7 @@ namespace SmartStore.Services.DataExchange.Export
 			}
 
 			_writer.Write("Id", entity.Id.ToString());
-			_writer.Write("SeoFilename", (string)picture.SeoFilename);
+			_writer.Write("SeoFilename", (string)picture.Name);
 			_writer.Write("MimeType", (string)picture.MimeType);
 			_writer.Write("ThumbImageUrl", (string)picture._ThumbImageUrl);
 			_writer.Write("ImageUrl", (string)picture._ImageUrl);
@@ -385,7 +385,7 @@ namespace SmartStore.Services.DataExchange.Export
 				_writer.Write("MetaTitle", (string)category.MetaTitle);
 				_writer.Write("SeName", (string)category.SeName);
 				_writer.Write("ParentCategoryId", entity.ParentCategoryId.ToString());
-				_writer.Write("PictureId", entity.PictureId.ToString());
+				_writer.Write("PictureId", entity.MediaFileId.ToString());
 				_writer.Write("PageSize", entity.PageSize.ToString());
 				_writer.Write("AllowCustomersToSelectPageSize", entity.AllowCustomersToSelectPageSize.ToString());
 				_writer.Write("PageSizeOptions", entity.PageSizeOptions);
@@ -428,11 +428,12 @@ namespace SmartStore.Services.DataExchange.Export
 			_writer.Write("Name", (string)manufacturer.Name);
 			_writer.Write("SeName", (string)manufacturer.SeName);
 			_writer.Write("Description", (string)manufacturer.Description);
-			_writer.Write("ManufacturerTemplateId", entity.ManufacturerTemplateId.ToString());
+            _writer.Write("BottomDescription", (string)manufacturer.BottomDescription);
+            _writer.Write("ManufacturerTemplateId", entity.ManufacturerTemplateId.ToString());
 			_writer.Write("MetaKeywords", (string)manufacturer.MetaKeywords);
 			_writer.Write("MetaDescription", (string)manufacturer.MetaDescription);
 			_writer.Write("MetaTitle", (string)manufacturer.MetaTitle);
-			_writer.Write("PictureId", entity.PictureId.ToString());
+			_writer.Write("PictureId", entity.MediaFileId.ToString());
 			_writer.Write("PageSize", entity.PageSize.ToString());
 			_writer.Write("AllowCustomersToSelectPageSize", entity.AllowCustomersToSelectPageSize.ToString());
 			_writer.Write("PageSizeOptions", entity.PageSizeOptions);
@@ -442,8 +443,10 @@ namespace SmartStore.Services.DataExchange.Export
 			_writer.Write("CreatedOnUtc", entity.CreatedOnUtc.ToString(_culture));
 			_writer.Write("UpdatedOnUtc", entity.UpdatedOnUtc.ToString(_culture));
 			_writer.Write("HasDiscountsApplied", entity.HasDiscountsApplied.ToString());
+            _writer.Write("SubjectToAcl", entity.SubjectToAcl.ToString());
+            _writer.Write("LimitedToStores", entity.LimitedToStores.ToString());
 
-			WritePicture(manufacturer.Picture, "Picture");
+            WritePicture(manufacturer.Picture, "Picture");
 
 			WriteLocalized(manufacturer);
 
@@ -564,6 +567,7 @@ namespace SmartStore.Services.DataExchange.Export
 			_writer.Write("BasePriceHasValue", ((bool)product.BasePriceHasValue).ToString());
 			_writer.Write("BasePriceInfo", (string)product._BasePriceInfo);
             _writer.Write("Visibility", ((int)entity.Visibility).ToString());
+            _writer.Write("Condition", ((int)entity.Condition).ToString());
 			_writer.Write("DisplayOrder", entity.DisplayOrder.ToString());
 			_writer.Write("IsSystemProduct", entity.IsSystemProduct.ToString());
 			_writer.Write("BundleTitleText", entity.BundleTitleText);
@@ -617,25 +621,28 @@ namespace SmartStore.Services.DataExchange.Export
                 foreach (dynamic download in product.Downloads)
                 {
                     Download downloadEntity = download.Entity;
+					var mediaFile = downloadEntity.MediaFile;
 
                     _writer.WriteStartElement("Download");
                     _writer.Write("Id", downloadEntity.Id.ToString());
                     _writer.Write("DownloadGuid", downloadEntity.DownloadGuid.ToString());
                     _writer.Write("UseDownloadUrl", downloadEntity.UseDownloadUrl.ToString());
                     _writer.Write("DownloadUrl", downloadEntity.DownloadUrl);
-                    _writer.Write("ContentType", downloadEntity.ContentType);
-                    _writer.Write("Filename", downloadEntity.Filename);
-                    _writer.Write("Extension", downloadEntity.Extension);
-                    _writer.Write("IsNew", downloadEntity.IsNew.ToString());
                     _writer.Write("IsTransient", downloadEntity.IsTransient.ToString());
                     _writer.Write("UpdatedOnUtc", downloadEntity.UpdatedOnUtc.ToString(_culture));
-                    _writer.Write("MediaStorageId", downloadEntity.MediaStorageId.HasValue ? downloadEntity.MediaStorageId.Value.ToString() : "");
                     _writer.Write("EntityId", downloadEntity.EntityId.ToString());
                     _writer.Write("EntityName", downloadEntity.EntityName);
                     _writer.Write("FileVersion", downloadEntity.FileVersion);
                     _writer.Write("Changelog", downloadEntity.Changelog);
+					if (!downloadEntity.UseDownloadUrl && mediaFile != null)
+					{
+						_writer.Write("ContentType", mediaFile.MimeType);
+						_writer.Write("Filename", mediaFile.Name);
+						_writer.Write("Extension", mediaFile.Extension);
+						_writer.Write("MediaStorageId", mediaFile.MediaStorageId.HasValue ? mediaFile.MediaStorageId.Value.ToString() : "");
+					}
 
-                    _writer.WriteEndElement();	// Download
+					_writer.WriteEndElement();	// Download
                 }
                 _writer.WriteEndElement();	// Downloads
             }
@@ -665,12 +672,15 @@ namespace SmartStore.Services.DataExchange.Export
 				_writer.WriteStartElement("ProductTags");
 				foreach (dynamic tag in product.ProductTags)
 				{
+                    ProductTag entityTag = tag.Entity;
+
 					_writer.WriteStartElement("ProductTag");
 					_writer.Write("Id", ((int)tag.Id).ToString());
 					_writer.Write("Name", (string)tag.Name);
 					_writer.Write("SeName", (string)tag.SeName);
+                    _writer.Write("Published", entityTag.Published.ToString());
 
-					WriteLocalized(tag);
+                    WriteLocalized(tag);
 
 					_writer.WriteEndElement();	// ProductTag
 				}
@@ -756,7 +766,7 @@ namespace SmartStore.Services.DataExchange.Export
 					_writer.Write("Height", entityPvac.Height.HasValue ? entityPvac.Height.Value.ToString(_culture) : "");
 					_writer.Write("BasePriceAmount", entityPvac.BasePriceAmount.HasValue ? entityPvac.BasePriceAmount.Value.ToString(_culture) : "");
 					_writer.Write("BasePriceBaseAmount", entityPvac.BasePriceBaseAmount.HasValue ? entityPvac.BasePriceBaseAmount.Value.ToString() : "");
-					_writer.Write("AssignedPictureIds", entityPvac.AssignedPictureIds);
+					_writer.Write("AssignedPictureIds", entityPvac.AssignedMediaFileIds);
 					_writer.Write("IsActive", entityPvac.IsActive.ToString());
 
 					WriteDeliveryTime(combination.DeliveryTime, "DeliveryTime");
@@ -780,7 +790,7 @@ namespace SmartStore.Services.DataExchange.Export
 				_writer.WriteStartElement("ProductPictures");
 				foreach (dynamic productPicture in product.ProductPictures)
 				{
-					ProductPicture entityProductPicture = productPicture.Entity;
+					ProductMediaFile entityProductPicture = productPicture.Entity;
 
 					_writer.WriteStartElement("ProductPicture");
 					_writer.Write("Id", entityProductPicture.Id.ToString());
@@ -856,7 +866,9 @@ namespace SmartStore.Services.DataExchange.Export
 					_writer.Write("Id", entitySao.Id.ToString());
 					_writer.Write("SpecificationAttributeId", entitySao.SpecificationAttributeId.ToString());
 					_writer.Write("DisplayOrder", entitySao.DisplayOrder.ToString());
-					_writer.Write("Name", (string)option.Name);
+                    _writer.Write("NumberValue", ((decimal)option.NumberValue).ToString(_culture));
+                    _writer.Write("Color", (string)option.Color);
+                    _writer.Write("Name", (string)option.Name);
 					_writer.Write("Alias", (string)option.Alias);
 
 					WriteLocalized(option);

@@ -17,7 +17,8 @@ namespace SmartStore.Core.Async
 		{
 			var value = GetStateInfo<T>(name);
 			return value != null && !object.Equals(value.Progress, default(T));
-		}
+
+        }
 
 		public virtual T Get<T>(string name = null)
 		{
@@ -71,7 +72,7 @@ namespace SmartStore.Core.Async
                 // On expiration or removal: remove corresponding cancel token also.
                 policy.RemovedCallback = (x) => OnRemoveCancelTokenSource(key);
 
-				_states.Set(key, new AsyncStateInfo { Progress = state, Duration = duration }, policy);
+                _states.Set(key, new AsyncStateInfo { Progress = state, Duration = duration }, policy);
 			}
 		}
 
@@ -93,7 +94,18 @@ namespace SmartStore.Core.Async
 
 		public virtual bool Remove<T>(string name = null)
 		{
-			return OnRemoveStateInfo(BuildKey<T>(name));
+            var key = BuildKey<T>(name);
+
+            if (!OnRemoveStateInfo(key))
+            {
+                // Remove corresponding cancel token (if any).
+                // Because the state does not exist, "RemovedCallBack"
+                // did not run.
+                OnRemoveCancelTokenSource(key);
+                return false;
+            }
+            
+            return true;
 		}
 
 		protected virtual bool OnRemoveStateInfo(string key)
