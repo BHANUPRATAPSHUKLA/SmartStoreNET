@@ -649,8 +649,12 @@ namespace SmartStore.Web.Controllers
 
                         if (vatNumberStatus == VatNumberStatus.Valid && _customerSettings.RegisterCustomerRoleId != 0)
                         {
-                            var customerRole = _customerService.GetCustomerRoleById(_customerSettings.VatIdValidCustomerRoleId);
-                            customer.CustomerRoles.Add(customerRole);
+                            var registeredRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered);
+                            var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
+                            if (customerRole != null && customerRole.Id != registeredRole.Id)
+                            {
+                                _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
+                            }
                         }
                     }
 
@@ -1050,8 +1054,12 @@ namespace SmartStore.Web.Controllers
 
                             if (vatNumberStatus == VatNumberStatus.Valid && _customerSettings.RegisterCustomerRoleId != 0)
                             {
-                                var customerRole = _customerService.GetCustomerRoleById(_customerSettings.VatIdValidCustomerRoleId);
-                                customer.CustomerRoles.Add(customerRole);
+                                var registeredRole = _customerService.GetCustomerRoleBySystemName(SystemCustomerRoleNames.Registered);
+                                var customerRole = _customerService.GetCustomerRoleById(_customerSettings.RegisterCustomerRoleId);
+                                if (customerRole != null && customerRole.Id != registeredRole.Id)
+                                {
+                                    _customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = customerRole.Id });
+                                }
                             }
 						}
                     }

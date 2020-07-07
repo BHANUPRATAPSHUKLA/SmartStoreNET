@@ -16,6 +16,7 @@ using SmartStore.Core.Domain.Orders;
 using SmartStore.Core.Domain.Payments;
 using SmartStore.Core.Domain.Shipping;
 using SmartStore.Core.Domain.Tax;
+using SmartStore.Core.Events;
 using SmartStore.Core.Security;
 using SmartStore.Services;
 using SmartStore.Services.Affiliates;
@@ -72,6 +73,7 @@ namespace SmartStore.Admin.Controllers
         private readonly IAffiliateService _affiliateService;
         private readonly Lazy<IGdprTool> _gdprTool;
         private readonly IDateTimeHelper _dateTimeHelper;
+        private readonly IEventPublisher _eventPublisher;
 
         public CustomerController(
             ICommonServices services,
@@ -101,7 +103,8 @@ namespace SmartStore.Admin.Controllers
             PluginMediator pluginMediator,
             IAffiliateService affiliateService,
             Lazy<IGdprTool> gdprTool,
-            IDateTimeHelper dateTimeHelper)
+            IDateTimeHelper dateTimeHelper,
+            IEventPublisher eventPublisher)
         {
             _services = services;
             _customerService = customerService;
@@ -131,6 +134,7 @@ namespace SmartStore.Admin.Controllers
             _affiliateService = affiliateService;
             _gdprTool = gdprTool;
             _dateTimeHelper = dateTimeHelper;
+            _eventPublisher = eventPublisher;
         }
 
         #region Utilities

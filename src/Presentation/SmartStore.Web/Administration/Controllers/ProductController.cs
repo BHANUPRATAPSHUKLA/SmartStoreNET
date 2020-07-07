@@ -261,8 +261,7 @@ namespace SmartStore.Admin.Controllers
 
 			p.AvailableEndDateTimeUtc = p.AvailableEndDateTimeUtc.ToEndOfTheDay();
 			p.SpecialPriceEndDateTimeUtc = p.SpecialPriceEndDateTimeUtc.ToEndOfTheDay();
-        }
-
+        
             p.ImportCatalogId = m.ImportCatalogId;
             p.EClass = m.EClass;
             p.Supplier = m.Supplier;

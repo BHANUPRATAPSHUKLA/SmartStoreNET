@@ -256,8 +256,7 @@ namespace SmartStore.Admin.Controllers
             var categoryTree = _categoryService.GetCategoryTree(includeHidden: true);
             var categories = categoryTree.Flatten(false);
             var selectedArr = selectedIds.ToIntArray();
-            var selectedArr = selectedIds.ToIntArray();
-
+            
             if (label.HasValue())
             {
                 categories = (new[] { new Category { Name = label, Id = 0 } }).Concat(categories);

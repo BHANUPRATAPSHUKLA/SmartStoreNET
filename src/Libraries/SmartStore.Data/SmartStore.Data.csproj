@@ -381,10 +381,6 @@
     <Compile Include="Migrations\201910162004581_Merge6.Designer.cs">
       <DependentUpon>201910162004581_Merge6.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201911090805330_ProductVisibility.cs" />
-    <Compile Include="Migrations\201911090805330_ProductVisibility.Designer.cs">
-      <DependentUpon>201911090805330_ProductVisibility.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\201911120909434_Merge7.cs" />
     <Compile Include="Migrations\201911120909434_Merge7.Designer.cs">
       <DependentUpon>201911120909434_Merge7.cs</DependentUpon>

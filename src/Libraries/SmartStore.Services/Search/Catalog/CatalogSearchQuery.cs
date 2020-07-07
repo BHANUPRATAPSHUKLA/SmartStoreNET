@@ -159,11 +159,6 @@ namespace SmartStore.Services.Search
             return this;
         }
 
-        public CatalogSearchQuery WithVisibility(ProductVisibility value)
-        {
-            return WithFilter(SearchFilter.ByField("visibility", (int)value).Mandatory().ExactMatch().NotAnalyzed());
-        }
-
 		public CatalogSearchQuery HasParentGroupedProduct(params int[] parentProductIds)
 		{
             return CreateFilter("parentid", parentProductIds);
