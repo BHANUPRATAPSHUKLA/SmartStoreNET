@@ -122,9 +122,6 @@ namespace SmartStore.Services.DataExchange.Import
                 case "Salutation":
                     key = "Address.Fields.Salutation";
                     break;
-                case "SubjectToAcl":
-                    key = "Admin.Catalog.Products.Acl";
-                    break;
                 case "VisibleIndividually":
                     key = "Admin.Catalog.Products.Fields.Visibility";
                     break;

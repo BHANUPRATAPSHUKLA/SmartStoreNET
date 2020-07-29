@@ -376,70 +376,59 @@ namespace SmartStore.Services.Customers.Importer
 			ImportExecuteContext context,
 			IEnumerable<ImportRow<Customer>> batch)
 		{
-            var num = 0;
-			CustomerRole role = null;
-            Dictionary<string, CustomerRole> allCustomerRoles = null;
-            var hasCustomerRoleSystemNames = context.DataSegmenter.HasColumn("CustomerRoleSystemNames");
+			Dictionary<string, CustomerRole> allCustomerRoles = null;
 
 			foreach (var row in batch)
 			{
 				var customer = row.Entity;
-                var importRoleSystemNames = row.GetDataValue<List<string>>("CustomerRoleSystemNames");
+				var importRoleSystemNames = row.GetDataValue<List<string>>("CustomerRoleSystemNames");
+
+				var assignedRoles = customer.CustomerRoleMappings
+					.Where(x => !x.IsSystemMapping)
+					.Select(x => x.CustomerRole)
+					.ToDictionarySafe(x => x.SystemName, StringComparer.OrdinalIgnoreCase);
+
+				// Roles to remove.
+				foreach (var customerRole in assignedRoles)
+				{
+					var systemName = customerRole.Key;
+					if (!systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.Administrators) &&
+						!systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.SuperAdministrators) &&
+						!importRoleSystemNames.Contains(systemName))
+					{
+						var mappings = customer.CustomerRoleMappings.Where(x => !x.IsSystemMapping && x.CustomerRoleId == customerRole.Value.Id).ToList();
+						mappings.Each(x => _customerService.DeleteCustomerRoleMapping(x));
+					}
+				}
 
 				// Roles to add.
 				foreach (var systemName in importRoleSystemNames)
 				{
-                    var updateCustomer = false;
-                    var importRoleSystemNames = row.GetDataValue<List<string>>("CustomerRoleSystemNames");
-					var assignedRoles = customer.CustomerRoles.ToDictionarySafe(x => x.SystemName, StringComparer.OrdinalIgnoreCase);
-
-					// Roles to remove.
-					foreach (var customerRole in assignedRoles)
+					if (systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.Administrators) ||
+						systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.SuperAdministrators))
 					{
-						var systemName = customerRole.Key;
-						if (!systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.Administrators) &&
-							!systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.SuperAdministrators) &&
-							!importRoleSystemNames.Contains(systemName))
-						{
-							customer.CustomerRoles.Remove(customerRole.Value);
-                            updateCustomer = true;
-						}
+						context.Result.AddInfo("Security. Ignored administrator role.", row.GetRowInfo(), "CustomerRoleSystemNames");
 					}
 					else if (!assignedRoles.ContainsKey(systemName))
 					{
-						if (systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.Administrators) ||
-							systemName.IsCaseInsensitiveEqual(SystemCustomerRoleNames.SuperAdministrators))
+						// Add role mapping, never insert roles.
+						// Be careful not to insert the roles several times!
+						if (allCustomerRoles == null)
 						{
-							context.Result.AddInfo("Security. Ignored administrator role.", row.GetRowInfo(), "CustomerRoleSystemNames");
+							allCustomerRoles = _customerRoleRepository.TableUntracked
+								.Where(x => !string.IsNullOrEmpty(x.SystemName))
+								.ToDictionarySafe(x => x.SystemName, StringComparer.OrdinalIgnoreCase);
 						}
-						else if (!assignedRoles.ContainsKey(systemName))
+
+						if (allCustomerRoles.TryGetValue(systemName, out var role))
 						{
-                            // Add role mapping, never insert roles.
-                            // Be careful not to insert the roles several times!
-                            if (allCustomerRoles == null)
-                            {
-                                allCustomerRoles = _customerRoleRepository.Table
-                                    .Where(x => !string.IsNullOrEmpty(x.SystemName))
-                                    .ToDictionarySafe(x => x.SystemName, StringComparer.OrdinalIgnoreCase);
-                            }
-
-                            if (allCustomerRoles?.TryGetValue(systemName, out role) ?? false)
-                            {
-                                customer.CustomerRoles.Add(role);
-                                updateCustomer = true;
-                            }
-                        }
+							_customerService.InsertCustomerRoleMapping(new CustomerRoleMapping { CustomerId = customer.Id, CustomerRoleId = role.Id });
+						}
 					}
-
-                    if (updateCustomer)
-                    {
-                        _customerRepository.Update(customer);
-                        ++num;
-                    }
 				}
 			}
 
-            return num;
+			return _services.DbContext.SaveChanges();
 		}
 
 		protected virtual int ProcessAddresses(
@@ -559,11 +548,7 @@ namespace SmartStore.Services.Customers.Importer
                 if (_taxSettings.EuVatEnabled)
                 {
                     SaveAttribute(row, SystemCustomerAttributeNames.VatNumber);
-                    SaveAttribute(row, SystemCustomerAttributeNames.VatNumberStatusId);
                 }
-
-                if (_dateTimeSettings.AllowCustomersToSetTimeZone)
-					SaveAttribute(row, SystemCustomerAttributeNames.TimeZoneId);
 
 				if (_customerSettings.StreetAddressEnabled)
 					SaveAttribute(row, SystemCustomerAttributeNames.StreetAddress);

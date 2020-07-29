@@ -113,7 +113,6 @@ namespace SmartStore.Web.Framework.UI
                                         var context = new CatalogSearchQuery()
                                             .VisibleOnly()
                                             .WithVisibility(ProductVisibility.Full)
-                                            .WithCategoryIds(null, categoryIds.ToArray())
                                             .HasStoreId(Services.StoreContext.CurrentStoreIdIfMultiStoreMode)
                                             .BuildFacetMap(false)
                                             .BuildHits(false);
