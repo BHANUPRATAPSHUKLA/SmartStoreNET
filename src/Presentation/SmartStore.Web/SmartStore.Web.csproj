@@ -1863,6 +1863,9 @@
     <Content Include="Views\Shared\MediaTemplates\Text.cshtml" />
     <Content Include="Views\Shared\MediaTemplates\Bin.cshtml" />
     <Content Include="Views\Shared\MediaTemplates\_Thumbnail.cshtml" />
+    <Content Include="Views\Product\Partials\Product.AssociatedProductSimple.cshtml" />
+    <Content Include="Views\Product\Partials\Product.Offer.ActionsSimple.cshtml" />
+    <Content Include="Views\Product\Partials\Product.OfferSimple.cshtml" />
     <None Include="Web.EFMigrations.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
